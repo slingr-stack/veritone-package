@@ -34,6 +34,7 @@ let configurationBuilder = function (config) {
         clientId: config.clientId,
         clientSecret: config.clientSecret,
         oauthCallback: config.oauthCallback,
+        state: "login",
         scope: "all"
     }
     return config;
