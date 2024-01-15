@@ -8,31 +8,70 @@
     </thead>
     <tbody>
     <tr>
-        <td>Skeleton package</td>
-        <td>January 3, 2024</td>
-        <td>Detailed description of the API of the Skeleton package.</td>
+        <td>Veritone package</td>
+        <td>January 12, 2024</td>
+        <td>Detailed description of the API of the Veritone package.</td>
     </tr>
     </tbody>
 </table>
 
 # Overview
 
+Veritone is a leading provider of artificial intelligence (AI) technology and solutions. 
+The company's proprietary operating system, aiWARETM, 
+orchestrates an expanding ecosystem of machine learning models to transform audio, 
+video and other data sources into actionable intelligence.
+
+Reference the [GraphQL API](https://docs.veritone.com/#/apis/using-graphql) and [GraphQL API Documentation](https://api.veritone.com/v3/graphqldocs/) for more information.
+
+## Package
+
+1. Go to the App Builder of your Application in the section "Packages," MARKETPLACE, veritone, and click on the button "Install."
+2. Copy the last field "OAuth callback" (We will complete the fields in the Slingr App again after creating the Veritone App).
+3. You will need to create an account at Veritone [here](https://www.veritone.com/careers/contact-us/)
+4. Login to Veritone in Content Management System [Login](https://login.veritone.com/) (Make sure to select the correct environment [stage/prod] and location [us-1/uk-1..])
+5. Go to the Developer App [here](https://developer.veritone.com/overview)
+6. Open the Applications section and create a new application by clicking the button "+ Create New" -> Application.
+7. Complete the fields with name and description of your choice.
+   The URL and Oauth URL fields have to be based on those copied in step 2.**
+   (i.e. URL: https://applicationtest.slingr.io/dev/runtime and Oauth URL:
+   https://applicationtest.slingr.io/dev/packages/veritone/authCallback)
+   and click on the button "SUBMIT".
+8. Under the Veritone App name, you will see the Client ID and Client Secret (after revealing it). Copy these values and complete the fields in the Slingr App.
+9. You will need to create an action under the User Entity to login with the Oauth Dependency of Veritone Package. `pkg.veritone.api.getAccessToken();`
+10. When you perform the Push of the Slingr application, and make click on the previous created action,
+   you will be prompted to log in to Veritone, once done, the package is fully configured
+   (This last step of logging in to Veritone will be requested to all users who use the Slingr App).
+
+- The environment and Geographic region (Or location) fields can be obtained from the url from which you are registered and to which you are logging in step 4.
+
+## Single Sign On
+
+There is an option in the Security section of the Builder of each Slingr Application
+that allows to configure a Single Sign On,
+this package is necessary to be able to configure this SSO.
+
+After configuring the Package and the Veritone Application:
+
+1. Go to the App Builder of your Application in the section "Security -> Single Sign On" and click on the button "+ Create."
+2. Select type "Veritone" and complete the fields with the label and name.
+3. Select the same environment and location as in the Veritone Package.
+4. Copy the field OAuth redirect URI provided by the Veritone Package. (Same value as in step 2 or 7 of the Package configuration)
+5. Complete the fields "Client ID" and "Client Secret" with the values obtained in the Veritone Application.
+6. Click on the button "+ Create" and then "Push changes."
+
 # Javascript API
 
-The Javascript API of the skeleton package has two pieces:
+The Javascript API of the Veritone package has two pieces:
 
 - **HTTP requests**
 - **Flow steps**
 
 ## HTTP requests
-You can make `GET`,`PUT`,`PATCH`,`DELETE` requests to the [skeleton API](API_URL_HERE) like this:
+You can make `GET`,`PUT`,`PATCH`,`DELETE`
+requests to the [veritone API](https://api.veritone.com/v3/graphqldocs/) like this:
 ```javascript
-var response = pkg.skeleton.api.get('/path3')
-var response = pkg.skeleton.api.put('/path1/:testPath', body)
-var response = pkg.skeleton.api.put('/path1/:testPath')
-var response = pkg.skeleton.api.patch('/path2?param2=' + httpOptions.query.param2 + '&param3=' + httpOptions.query.param3 + '', body)
-var response = pkg.skeleton.api.patch('/path2?param2=' + httpOptions.query.param2 + '&param3=' + httpOptions.query.param3 + '')
-var response = pkg.skeleton.api.delete('/path4')
+var response = pkg.veritone.api.post("/v3/graphql", {query: "{graphqlServiceInfo {buildInfo}}"})
 ```
 
 Please take a look at the documentation of the [HTTP service](https://github.com/slingr-stack/http-service)
@@ -201,18 +240,16 @@ Generic flow step for full use of the entire package and its services.
 
 </details>
 
-For more information about how shortcuts or flow steps work, and how they are generated, take a look at the [slingr-helpgen tool](https://github.com/slingr-stack/slingr-helpgen).
-
 ## Dependencies
-* HTTP Service (v1.3.7)
-* Oauth Package (v1.0.19) // TODO review and remove if its needed
+* HTTP Service (v1.3.9)
+* Oauth Package (v1.0.20)
 
-## About SLINGR
+# About SLINGR
 
 SLINGR is a low-code rapid application development platform that accelerates development, with robust architecture for integrations and executing custom workflows and automation.
 
 [More info about SLINGR](https://slingr.io)
 
-## License
+# License
 
 This package is licensed under the Apache License 2.0. See the `LICENSE` file for more details.

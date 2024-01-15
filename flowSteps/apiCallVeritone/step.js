@@ -20,7 +20,7 @@ var httpService = dependencies.http;
  * {number} connectionTimeout, Read timeout interval, in milliseconds.
  * {number} readTimeout, Connect timeout interval, in milliseconds.
  */
-step.apiCallSkeleton = function (inputs) {
+step.apiCallVeritone = function (inputs) {
 
 	var inputsLogic = {
 		headers: inputs.headers || [],
@@ -58,6 +58,7 @@ step.apiCallSkeleton = function (inputs) {
 	}
 
 	options= setApiUri(options);
+	options= setAuthorization(options);
 	options= setRequestHeaders(options);
 
 	switch (inputsLogic.method.toLowerCase()) {
@@ -118,80 +119,64 @@ function stringToObject (obj) {
 }
 
 function setApiUri(options) {
-	var API_URL = config.get("SKELETON_API_BASE_URL");
 	var url = options.path || "";
+
+	var prefix = "";
+	var postfix = ".veritone.com";
+	var apiUri = "";
+
+	if (config.get("environment") === "dev") {
+		apiUri = ".dev";
+	} else if (config.get("environment") === "stage") {
+		apiUri = ".stage";
+	} else if (config.get("environment") === "stage-me") {
+		apiUri = ".stage-me";
+	}
+
+	if (config.get("region") === "us-1") {
+		apiUri = apiUri + ".us-1";
+	} else if (config.get("region") === "ca-1") {
+		apiUri = apiUri + ".ca-1";
+	} else if (config.get("region") === "uk-1") {
+		apiUri = apiUri + ".uk-1";
+	} else {
+		apiUri = apiUri + config.get("region");
+	}
+
+	if (config.get("apiSwitch") === "data") {
+		prefix = "https://api";
+	} else if (config.get("apiSwitch") === "voice") {
+		prefix = "https://voice2";
+		apiUri = apiUri + postfix + "/api";
+	} else if (config.get("apiSwitch") === "processing") {
+		prefix = "https://api.aiware.com";
+	}
+
+	var API_URL = prefix + apiUri + postfix;
+
 	options.url = API_URL + url;
-	sys.logs.debug('[skeleton] Set url: ' + options.path + "->" + options.url);
+	sys.logs.debug('[veritone] Set url: ' + options.path + "->" + options.url);
 	return options;
 }
 
 function setRequestHeaders(options) {
 	var headers = options.headers || {};
-
-	sys.logs.debug('[skeleton] Set header Bearer');
 	headers = mergeJSON(headers, {"Content-Type": "application/json"});
-	headers = mergeJSON(headers, {"Authorization": "Bearer "+getAccessTokenForAccount()});
-
-	if (headers.Accept === undefined || headers.Accept === null || headers.Accept === "") {
-		sys.logs.debug('[skeleton] Set header accept');
-		headers = mergeJSON(headers, {"Accept": "application/json"});
-	}
 
 	options.headers = headers;
 	return options;
 }
 
-function getAccessTokenForAccount(account) {
-	account = account || "account";
-	sys.logs.info('[skeleton] Getting access token for account: '+account);
-	var installationJson = sys.storage.get('installationInfo-Skeleton---'+account) || {id: null};
-	var token = installationJson.token || null;
-	var expiration = installationJson.expiration || 0;
-	if (!token || expiration < new Date().getTime()) {
-		sys.logs.info('[skeleton] Access token is expired or not found. Getting new token');
-		var res = httpService.post(
-			{
-				url: "https://oauth2.googleapis.com/token",
-				headers: {
-					'Content-Type': 'application/x-www-form-urlencoded'
-				},
-				body: {
-					grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-					assertion: getJsonWebToken()
-				}
-			});
-		token = res.access_token;
-		var expires_at = res.expires_in;
-		expiration = new Date(new Date(expires_at) - 1 * 60 * 1000).getTime();
-		installationJson = mergeJSON(installationJson, {"token": token, "expiration": expiration});
-		sys.logs.info('[skeleton] Saving new token for account: ' + account);
-		sys.storage.replace('installationInfo-Skeleton---'+account, installationJson);
-	}
-	return token;
-}
-
-function getJsonWebToken() {
-	var currentTime = new Date().getTime();
-	var futureTime = new Date(currentTime + ( 10 * 60 * 1000)).getTime();
-	var scopeProp= config.get("scope");
-	var scopes;
-	if (!!scopeProp) {
-		scopes = scopeProp.map(function (s) {
-			return "https://www.googleapis.com/auth/" + s;
-		});
-	}
-	var scopesGlobal = scopes.join(" ");
-	return sys.utils.crypto.jwt.generate(
-		{
-			iss: config.get("serviceAccountEmail"),
-			aud: GOOGLEWORKSPACE_API_AUTH_URL,
-			scope: scopesGlobal,
-			iat: currentTime,
-			exp: futureTime
-		},
-		config.get("privateKey"),
-		"RS256"
-	)
+function setAuthorization(options) {
+	sys.logs.debug('[veritone] Setting header token oauth');
+	var authorization = options.authorization || {};
+	authorization = mergeJSON(authorization, {
+		type: "oauth2",
+		accessToken: sys.storage.get('installationInfo-Veritone-User-'+sys.context.getCurrentUserRecord().id() + ' - access_token', {decrypt:true}),
+		headerPrefix: "Bearer"
+	});
+	options.authorization = authorization;
+	return options;
 }
 
 function mergeJSON (json1, json2) {

@@ -1,63 +1,145 @@
 {
-    "name": "skeleton",
-    "label": "Skeleton Package",
+    "name": "veritone",
+    "label": "Veritone Package",
     "dependencies": [
         {
             "type": "service",
-            "name": "http",
-            "version": "v1.3.7",
+                "name": "http",
+            "version": "v1.3.8",
             "instanceId": "shared"
         },
         {
             "type": "package",
             "name": "oauth",
-            "version": "v1.0.19"
+            "version": "^v1.0.20"
         }
     ],
     "configurationBuilder": "/configurationBuilder.js",
     "configuration": [
         {
-            "name": "SKELETON_API_BASE_URL",
-            "label": "Skeleton Api Url",
-            "type": "label",
-            "value": "https://example.com/"
+            "name": "config1",
+            "label": "OAuth config",
+            "value": "The following fields are needed to access to the Veritone API.",
+            "type": "info"
         },
         {
-            "name": "choice",
-            "label": "Choice",
-            "required": false,
-            "defaultValue": "true",
+            "name": "environment",
+            "label": "Environment",
+            "description": "Select the environment to target for the AI Data API and AI Data Admin. (If you are unsure, select 'Production')",
             "type": "buttonsGroup",
+            "required": true,
+            "defaultValue": "prod",
             "typeOptions": {
-                "allowCustom": true,
-                "possibleValues": [
+                "allowCustom": false,
+                "possibleValues":[
                     {
-                        "label": "True",
-                        "name": "true"
+                        "label":"Developer",
+                        "name":"dev"
                     },
                     {
-                        "label": "False",
-                        "name": "false"
+                        "label":"Staging",
+                        "name":"stage"
                     },
                     {
-                        "label": "Other",
-                        "name": "other"
+                        "label":"Staging Me",
+                        "name":"stage-me"
+                    },
+                    {
+                        "label":"Production",
+                        "name":"prod"
                     }
                 ]
             }
         },
         {
-            "name": "text",
-            "label": "Text",
-            "type": "text",
-            "required": "false",
-            "visibility": "config.choice == 'true'"
+            "name": "region",
+            "label": "Geographic region",
+            "description": "Select the geographic region to be targeted by the AI Data API and AI Data Admin. (Custom allowed i.e. 'us-1'. If you are unsure, select 'Without region')",
+            "type": "buttonsGroup",
+            "required": true,
+            "defaultValue": "no",
+            "typeOptions": {
+                "allowCustom": true,
+                "possibleValues":[
+                    {
+                        "label":"US-1",
+                        "name":"us-1"
+                    },
+                    {
+                        "label":"CA-1",
+                        "name":"ca-1"
+                    },
+                    {
+                        "label":"UK-1",
+                        "name":"uk-1"
+                    },
+                    {
+                        "label":"UK",
+                        "name":"uk"
+                    },
+                    {
+                        "label":"Without region",
+                        "name":"no"
+                    }
+                ]
+            }
         },
         {
-            "name": "info",
-            "label": "info",
+            "name": "apiToken",
+            "label": "API token",
+            "description": "API token generated in the Veritone Admin Console",
+            "type": "text"
+        },
+        {
+            "label": "Client Id",
+            "name": "clientId",
+            "description": "The client ID of your Veritone App",
+            "type": "text"
+        },
+        {
+            "label": "Client Secret",
+            "description": "The client secret of your Veritone App",
+            "name": "clientSecret",
+            "type": "text"
+        },
+        {
+            "name": "oauthCallback",
+            "label": "OAuth callback",
+            "description": "The OAuth URL to configure in your Veritone App (Copy this value and paste it in the 'URL' field of your Veritone App).",
             "type": "label",
-            "value": "'info'"
+            "value": "config.AUTH_CALLBACK_URL+'/authCallback'"
+        },
+        {
+            "name": "webhooksUrl",
+            "label": "Webhooks URL",
+            "description": "The URL to configure in webhooks of your GitHub App",
+            "type": "label",
+            "value": "@config.WEBHOOK_URL"
+        },
+        {
+            "name": "apiSwitch",
+            "label": "Api switch",
+            "description": "Select the API you want to use. (You can use this property with the dynamic properties scripts, set this as default api)",
+            "type": "buttonsGroup",
+            "required": true,
+            "defaultValue": "data",
+            "typeOptions": {
+                "allowCustom": false,
+                "possibleValues":[
+                    {
+                        "label":"Processing API",
+                        "name":"processing"
+                    },
+                    {
+                        "label":"Voice API",
+                        "name":"voice"
+                    },
+                    {
+                        "label":"AI Data API",
+                        "name":"data"
+                    }
+                ]
+            }
         }
     ],
     "events": [
@@ -85,18 +167,13 @@
         },
         {
             "type": "flowStep",
-            "namespace": "apiCallSkeleton",
-            "path": "/flowSteps/apiCallSkeleton"
+            "namespace": "apiCallVeritone",
+            "path": "/flowSteps/apiCallVeritone"
         },
         {
             "type": "flowStep",
-            "namespace": "customFlow",
-            "path": "/flowSteps/customFlow"
-        },
-        {
-            "type": "uiService",
-            "namespace": "testUiService",
-            "path": "/uiServices/testUiService"
+            "namespace": "apiDataVeritone",
+            "path": "/flowSteps/apiDataVeritone"
         }
     ]
 }
